@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const passport_jwt_1 = require("passport-jwt");
 const users_1 = __importDefault(require("../models/users"));
-//SECTION - Passport Middleware
+// Passport Middleware
 const opts = {
     jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey: process.env.JWTSECRET,
@@ -33,4 +33,3 @@ exports.default = new passport_jwt_1.Strategy(opts, function (payload, done) {
         }
     });
 });
-//!SECTION

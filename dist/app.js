@@ -10,12 +10,13 @@ require("dotenv/config");
 const passport_1 = __importDefault(require("passport"));
 const passport_2 = __importDefault(require("./middlewares/passport"));
 const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
+const user_routes_1 = __importDefault(require("./routes/user.routes"));
 const private_routes_1 = __importDefault(require("./routes/private.routes"));
-//ANCHOR - Init
+// Init
 const app = (0, express_1.default)();
-//ANCHOR - Settings
+// Settings
 app.set("port", process.env.PORT || 3000);
-//ANCHOR - Middlewares
+// Middlewares
 app.use((0, morgan_1.default)("dev"));
 app.use((0, cors_1.default)());
 app.use(express_1.default.urlencoded({ extended: false }));
@@ -23,9 +24,10 @@ app.use(express_1.default.json());
 app.use(passport_1.default.initialize());
 passport_1.default.use(passport_2.default);
 app.use(auth_routes_1.default);
+app.use(user_routes_1.default);
 app.use(private_routes_1.default);
-//ANCHOR - Routes
+// Routes
 app.get("/", function (req, res) {
-    res.send(`http:/localhost:${app.get("port")}`);
+    res.send(`http://localhost:${app.get("port")}`);
 });
 exports.default = app;

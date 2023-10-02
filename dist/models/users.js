@@ -15,6 +15,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const userSchema = new mongoose_1.default.Schema({
+    name: {
+        type: String,
+        require: true,
+        lowercase: true,
+        trim: true,
+    },
+    lname: {
+        type: String,
+        require: true,
+        lowercase: true,
+        trim: true,
+    },
     email: {
         type: String,
         unique: true,
@@ -22,12 +34,22 @@ const userSchema = new mongoose_1.default.Schema({
         lowercase: true,
         trim: true,
     },
+    alias: {
+        type: String,
+        unique: true,
+        require: true,
+        trim: true,
+    },
     password: {
         type: String,
         require: true,
     },
+    notes: {
+        type: [String],
+    },
 });
-//ANCHOR - Register Password Encryption
+// Register Password Encryption
+// This will run before any document.save()
 userSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         const user = this;
@@ -42,7 +64,7 @@ userSchema.pre("save", function (next) {
         next();
     });
 });
-//ANCHOR - Login Password Validator
+// Login Password Validator
 userSchema.methods.comparePassword = function (password) {
     return __awaiter(this, void 0, void 0, function* () {
         return yield bcrypt_1.default.compare(password, this.password);

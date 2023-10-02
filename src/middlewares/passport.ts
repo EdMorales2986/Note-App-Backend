@@ -1,7 +1,7 @@
 import { Strategy, ExtractJwt, StrategyOptions } from "passport-jwt";
 import users from "../models/users";
 
-//SECTION - Passport Middleware
+// Passport Middleware
 const opts: StrategyOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWTSECRET,
@@ -18,4 +18,3 @@ export default new Strategy(opts, async function (payload, done) {
     console.log(error);
   }
 });
-//!SECTION

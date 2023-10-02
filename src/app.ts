@@ -6,28 +6,31 @@ import passport from "passport";
 import passportMiddleWare from "./middlewares/passport";
 
 import authRoutes from "./routes/auth.routes";
+import userRoutes from "./routes/user.routes";
 import privateRoutes from "./routes/private.routes";
 
-//ANCHOR - Init
+// Init
 const app = express();
 
-//ANCHOR - Settings
+// Settings
 app.set("port", process.env.PORT || 3000);
 
-//ANCHOR - Middlewares
+// Middlewares
 app.use(morgan("dev"));
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(passport.initialize());
+
 passport.use(passportMiddleWare);
 
 app.use(authRoutes);
+app.use(userRoutes);
 app.use(privateRoutes);
 
-//ANCHOR - Routes
-app.get("/", function (req, res) {
-  res.send(`http:/localhost:${app.get("port")}`);
+// Routes
+app.get("/", function (req: express.Request, res: express.Response) {
+  res.send(`http://localhost:${app.get("port")}`);
 });
 
 export default app;
