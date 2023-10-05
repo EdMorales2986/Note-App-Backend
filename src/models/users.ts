@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
-// Extending from document might not be needed anymore but i'm keeping it as close to the tutorial as possible
 export interface IUser extends mongoose.Document {
   name: string;
   lname: string;
@@ -51,11 +50,11 @@ const userSchema = new mongoose.Schema({
 // This will run before any document.save()
 userSchema.pre<IUser>("save", async function (next) {
   const user = this;
-  //REVIEW - Not fully sure, it will run the rest of the code (below the condition) only if the user is a new one
+  // if password is not being modified it will skip
   if (!user.isModified("password")) {
     return next();
   }
-  //ANCHOR - Process to cipher/encrypt a password (Hashing)
+  // Process to cipher/encrypt a password (Hashing)
   const salt = await bcrypt.genSalt(10);
   const hash = await bcrypt.hash(user.password, salt);
   user.password = hash;

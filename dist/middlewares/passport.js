@@ -16,7 +16,8 @@ const passport_jwt_1 = require("passport-jwt");
 const users_1 = __importDefault(require("../models/users"));
 // Passport Middleware
 const opts = {
-    jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
+    // jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    jwtFromRequest: passport_jwt_1.ExtractJwt.fromUrlQueryParameter("JWT"),
     secretOrKey: process.env.JWTSECRET,
 };
 exports.default = new passport_jwt_1.Strategy(opts, function (payload, done) {

@@ -14,13 +14,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateInfo = exports.deleteUser = exports.signIn = exports.signUp = void 0;
 const users_1 = __importDefault(require("../models/users"));
+const notes_1 = __importDefault(require("../models/notes"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 function createToken(user) {
-    return jsonwebtoken_1.default.sign({ id: user.id, alias: user.alias }, `${process.env.JWTSECRET}`, { expiresIn: 300 });
+    return jsonwebtoken_1.default.sign({ id: user.id, alias: user.alias }, `${process.env.JWTSECRET}`, { expiresIn: 600 });
 }
 // Auth Route Functionality
 // Sign Up functions
-// Specifyin that it will return a promise of type 'Response' don't seem to be necessary
+// Specifying that it will return a promise of type 'Response' is not obligatory
 // export const signUp = async function (req: Request,res: Response) { <-- this will work
 const signUp = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -41,11 +42,11 @@ const signUp = function (req, res) {
         // .save() Saves this document 'newUser' by inserting a new document into the database
         yield newUser.save();
         return res.status(200).json(newUser);
+        // return res.redirect(`/signin}`);
     });
 };
 exports.signUp = signUp;
 // Sign In functions
-// export const signIn = async function (req: Request, res: Response): Promise<Response> {
 const signIn = function (req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!req.body.alias || !req.body.password) {
@@ -57,8 +58,8 @@ const signIn = function (req, res, next) {
         }
         const isMatch = yield user.comparePassword(req.body.password);
         if (isMatch) {
-            res.setHeader("Authorization", `Bearer ${createToken(user)}`);
-            return next();
+            // const token = createToken(user);
+            return res.redirect(`/signin/${req.body.alias}`);
         }
         return res
             .status(400)
@@ -71,31 +72,33 @@ const deleteUser = function (req, res) {
         if (!req.body.alias || !req.body.password) {
             return res.status(400).json({ msg: "Please send valid data" });
         }
-        const user = yield users_1.default.findOne({ alias: req.body.alias });
+        const user = yield users_1.default.findOne({ alias: req.params.user });
         if (!user) {
             return res.status(400).json({ msg: "User not found" });
         }
         const isMatch = yield user.comparePassword(req.body.password);
         if (user && isMatch) {
-            yield users_1.default.deleteOne({ alias: req.body.alias });
+            yield users_1.default.deleteOne({ alias: req.params.user });
+            yield notes_1.default.deleteMany({ owner: req.params.User });
             return res.status(200).json({ msg: "user deleted" });
+            // return res.redirect(`/signin`);
         }
-        return res.status(400);
+        return res
+            .status(400)
+            .json({ msg: "Encountered and error during this process" });
     });
 };
 exports.deleteUser = deleteUser;
 const updateInfo = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!req.body.oldAlias ||
-            !req.body.newAlias ||
-            !req.body.oldPass ||
+        if (!req.body.oldPass ||
             !req.body.newPass ||
             !req.body.email ||
             !req.body.name ||
             !req.body.lname) {
             return res.status(400).json({ msg: "Please send valid data" });
         }
-        const user = yield users_1.default.findOne({ alias: req.body.oldAlias });
+        const user = yield users_1.default.findOne({ alias: req.params.user });
         if (!user) {
             return res.status(400).json({ msg: "User not found" });
         }
@@ -104,10 +107,9 @@ const updateInfo = function (req, res) {
             user.name = req.body.name;
             user.lname = req.body.lname;
             user.email = req.body.email;
-            user.alias = req.body.newAlias;
             user.password = req.body.newPass;
             yield user.save();
-            return res.status(200).json({ msg: "information modified" });
+            return res.redirect(`/signin/${req.params.user}`);
         }
         // {
         //   "name": "Alonso",
@@ -118,7 +120,9 @@ const updateInfo = function (req, res) {
         //   "oldPass": "Wo_Xing_Shi",
         //   "newPass": "bruh"
         // }
-        return res.status(400);
+        return res
+            .status(400)
+            .json({ msg: "Encountered and error during this process" });
     });
 };
 exports.updateInfo = updateInfo;

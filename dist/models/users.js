@@ -53,11 +53,11 @@ const userSchema = new mongoose_1.default.Schema({
 userSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         const user = this;
-        //REVIEW - Not fully sure, it will run the rest of the code (below the condition) only if the user is a new one
+        // if password is not being modified it will skip
         if (!user.isModified("password")) {
             return next();
         }
-        //ANCHOR - Process to cipher/encrypt a password (Hashing)
+        // Process to cipher/encrypt a password (Hashing)
         const salt = yield bcrypt_1.default.genSalt(10);
         const hash = yield bcrypt_1.default.hash(user.password, salt);
         user.password = hash;

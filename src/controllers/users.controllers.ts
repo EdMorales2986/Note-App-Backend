@@ -1,19 +1,20 @@
 import { Request, Response, NextFunction } from "express";
 import users, { IUser } from "../models/users";
+import notes from "../models/notes";
 import jwt from "jsonwebtoken";
 
 function createToken(user: IUser) {
   return jwt.sign(
     { id: user.id, alias: user.alias },
     `${process.env.JWTSECRET}`,
-    { expiresIn: 300 }
+    { expiresIn: 600 }
   );
 }
 
 // Auth Route Functionality
-// Sign Up functions
 
-// Specifyin that it will return a promise of type 'Response' don't seem to be necessary
+// Sign Up functions
+// Specifying that it will return a promise of type 'Response' is not obligatory
 // export const signUp = async function (req: Request,res: Response) { <-- this will work
 export const signUp = async function (
   req: Request,
@@ -41,10 +42,10 @@ export const signUp = async function (
   await newUser.save();
 
   return res.status(200).json(newUser);
+  // return res.redirect(`/signin}`);
 };
 
 // Sign In functions
-// export const signIn = async function (req: Request, res: Response): Promise<Response> {
 export const signIn = async function (
   req: Request,
   res: Response,
@@ -61,8 +62,8 @@ export const signIn = async function (
 
   const isMatch = await user.comparePassword(req.body.password);
   if (isMatch) {
-    res.setHeader("Authorization", `Bearer ${createToken(user)}`);
-    return next();
+    // const token = createToken(user);
+    return res.redirect(`/signin/${req.body.alias}`);
   }
 
   return res
@@ -70,35 +71,32 @@ export const signIn = async function (
     .json({ msg: "Either the password or the alias are wrong, check again" });
 };
 
-export const deleteUser = async function (
-  req: Request,
-  res: Response
-): Promise<Response> {
+export const deleteUser = async function (req: Request, res: Response) {
   if (!req.body.alias || !req.body.password) {
     return res.status(400).json({ msg: "Please send valid data" });
   }
 
-  const user = await users.findOne({ alias: req.body.alias });
+  const user = await users.findOne({ alias: req.params.user });
   if (!user) {
     return res.status(400).json({ msg: "User not found" });
   }
 
   const isMatch = await user.comparePassword(req.body.password);
   if (user && isMatch) {
-    await users.deleteOne({ alias: req.body.alias });
+    await users.deleteOne({ alias: req.params.user });
+    await notes.deleteMany({ owner: req.params.User });
+
     return res.status(200).json({ msg: "user deleted" });
+    // return res.redirect(`/signin`);
   }
 
-  return res.status(400);
+  return res
+    .status(400)
+    .json({ msg: "Encountered and error during this process" });
 };
 
-export const updateInfo = async function (
-  req: Request,
-  res: Response
-): Promise<Response> {
+export const updateInfo = async function (req: Request, res: Response) {
   if (
-    !req.body.oldAlias ||
-    !req.body.newAlias ||
     !req.body.oldPass ||
     !req.body.newPass ||
     !req.body.email ||
@@ -108,7 +106,7 @@ export const updateInfo = async function (
     return res.status(400).json({ msg: "Please send valid data" });
   }
 
-  const user = await users.findOne({ alias: req.body.oldAlias });
+  const user = await users.findOne({ alias: req.params.user });
   if (!user) {
     return res.status(400).json({ msg: "User not found" });
   }
@@ -118,10 +116,9 @@ export const updateInfo = async function (
     user.name = req.body.name;
     user.lname = req.body.lname;
     user.email = req.body.email;
-    user.alias = req.body.newAlias;
     user.password = req.body.newPass;
     await user.save();
-    return res.status(200).json({ msg: "information modified" });
+    return res.redirect(`/signin/${req.params.user}`);
   }
 
   // {
@@ -134,5 +131,7 @@ export const updateInfo = async function (
   //   "newPass": "bruh"
   // }
 
-  return res.status(400);
+  return res
+    .status(400)
+    .json({ msg: "Encountered and error during this process" });
 };

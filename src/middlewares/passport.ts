@@ -3,7 +3,8 @@ import users from "../models/users";
 
 // Passport Middleware
 const opts: StrategyOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  // jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: ExtractJwt.fromUrlQueryParameter("JWT"),
   secretOrKey: process.env.JWTSECRET,
 };
 
