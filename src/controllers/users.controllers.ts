@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
+import notes, { INote } from "../models/notes";
 import users, { IUser } from "../models/users";
-import notes from "../models/notes";
+import cols, { ICol } from "../models/col";
 import jwt from "jsonwebtoken";
 
 function createToken(user: IUser) {
@@ -84,7 +85,8 @@ export const deleteUser = async function (req: Request, res: Response) {
   const isMatch = await user.comparePassword(req.body.password);
   if (user && isMatch) {
     await users.deleteOne({ alias: req.params.user });
-    await notes.deleteMany({ owner: req.params.User });
+    await notes.deleteMany({ owner: req.params.user });
+    await cols.deleteMany({ owner: req.params.user });
 
     return res.status(200).json({ msg: "user deleted" });
     // return res.redirect(`/signin`);

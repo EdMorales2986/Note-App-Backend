@@ -9,7 +9,8 @@ import passportMiddleWare from "./middlewares/passport";
 
 import authRoutes from "./routes/auth.routes";
 import notesRoutes from "./routes/notes.routes";
-import privateRoutes from "./routes/private.routes";
+import colRoutes from "./routes/col.routes";
+// import privateRoutes from "./routes/private.routes";
 
 // Init
 const app = express();
@@ -37,7 +38,7 @@ passport.use(passportMiddleWare);
 
 app.use(authRoutes);
 app.use(notesRoutes);
-app.use(privateRoutes);
+app.use(colRoutes);
 
 // Routes
 app.get("/", function (req: express.Request, res: express.Response) {

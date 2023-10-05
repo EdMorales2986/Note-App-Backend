@@ -13,8 +13,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateInfo = exports.deleteUser = exports.signIn = exports.signUp = void 0;
-const users_1 = __importDefault(require("../models/users"));
 const notes_1 = __importDefault(require("../models/notes"));
+const users_1 = __importDefault(require("../models/users"));
+const col_1 = __importDefault(require("../models/col"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 function createToken(user) {
     return jsonwebtoken_1.default.sign({ id: user.id, alias: user.alias }, `${process.env.JWTSECRET}`, { expiresIn: 600 });
@@ -79,7 +80,8 @@ const deleteUser = function (req, res) {
         const isMatch = yield user.comparePassword(req.body.password);
         if (user && isMatch) {
             yield users_1.default.deleteOne({ alias: req.params.user });
-            yield notes_1.default.deleteMany({ owner: req.params.User });
+            yield notes_1.default.deleteMany({ owner: req.params.user });
+            yield col_1.default.deleteMany({ owner: req.params.user });
             return res.status(200).json({ msg: "user deleted" });
             // return res.redirect(`/signin`);
         }

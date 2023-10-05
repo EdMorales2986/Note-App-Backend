@@ -15,27 +15,39 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteNote = exports.updateNote = exports.createNote = exports.displayNote = void 0;
 const notes_1 = __importDefault(require("../models/notes"));
 const users_1 = __importDefault(require("../models/users"));
-const displayNote = function (req, res, next) {
+const col_1 = __importDefault(require("../models/col"));
+const displayNote = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         // const notesUser = await notes.aggregate([{ $sort: { updatedAt : -1 } }]);
         // const notesUser = await notes.aggregate([{ $sort: { createdAt : -1 } }]);
-        const notesUser = yield notes_1.default.aggregate([{ $sort: { col: -1 } }]);
+        const notesUser = yield notes_1.default.aggregate([
+            { $sort: { col: -1 } },
+            { $match: { owner: req.params.user } },
+        ]);
         res.json(notesUser);
-        next();
     });
 };
 exports.displayNote = displayNote;
 const createNote = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!req.body.title || !req.body.content || !req.body.owner) {
+        if (!req.body.title || !req.body.content) {
             return res.status(400).json({ msg: "Please send valid data" });
         }
-        if (req.body.owner != req.params.user) {
-            return res.status(400).json({ msg: "Dangerous Maneuver" });
+        const col = yield col_1.default.findOne({
+            name: req.body.col,
+            owner: req.params.user,
+        });
+        if (!col) {
+            return res.status(400).json({ msg: "Collection doesn't exist" });
         }
         const user = yield users_1.default.findOne({ alias: req.params.user });
         if (user) {
-            const newNote = new notes_1.default(req.body);
+            const newNote = new notes_1.default({
+                title: req.body.title,
+                content: req.body.content,
+                owner: req.params.user,
+                col: req.body.col,
+            });
             yield newNote.save();
             user.notes.push(newNote._id);
             yield user.save();
@@ -52,6 +64,13 @@ const updateNote = function (req, res) {
             return res.status(400).json({ msg: "Please send valid data" });
         }
         const note = yield notes_1.default.findById(req.params.id);
+        const col = yield col_1.default.findOne({
+            name: req.body.col,
+            owner: req.params.user,
+        });
+        if (!col) {
+            return res.status(400).json({ msg: "Collection doesn't exist" });
+        }
         if (note) {
             note.title = req.body.title;
             note.content = req.body.content;

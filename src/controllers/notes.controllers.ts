@@ -1,33 +1,41 @@
 import { Request, Response, NextFunction } from "express";
-import notes from "../models/notes";
-import users from "../models/users";
+import notes, { INote } from "../models/notes";
+import users, { IUser } from "../models/users";
+import cols, { ICol } from "../models/col";
 
-export const displayNote = async function (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export const displayNote = async function (req: Request, res: Response) {
   // const notesUser = await notes.aggregate([{ $sort: { updatedAt : -1 } }]);
   // const notesUser = await notes.aggregate([{ $sort: { createdAt : -1 } }]);
-  const notesUser = await notes.aggregate([{ $sort: { col: -1 } }]);
+  const notesUser = await notes.aggregate([
+    { $sort: { col: -1 } },
+    { $match: { owner: req.params.user } },
+  ]);
   res.json(notesUser);
-  next();
 };
 
 export const createNote = async function (
   req: Request,
   res: Response
 ): Promise<Response> {
-  if (!req.body.title || !req.body.content || !req.body.owner) {
+  if (!req.body.title || !req.body.content) {
     return res.status(400).json({ msg: "Please send valid data" });
   }
-  if (req.body.owner != req.params.user) {
-    return res.status(400).json({ msg: "Dangerous Maneuver" });
-  }
 
+  const col = await cols.findOne({
+    name: req.body.col,
+    owner: req.params.user,
+  });
+  if (!col) {
+    return res.status(400).json({ msg: "Collection doesn't exist" });
+  }
   const user = await users.findOne({ alias: req.params.user });
   if (user) {
-    const newNote = new notes(req.body);
+    const newNote = new notes({
+      title: req.body.title,
+      content: req.body.content,
+      owner: req.params.user,
+      col: req.body.col,
+    });
     await newNote.save();
     user.notes.push(newNote._id);
     await user.save();
@@ -45,6 +53,13 @@ export const updateNote = async function (req: Request, res: Response) {
   }
 
   const note = await notes.findById(req.params.id);
+  const col = await cols.findOne({
+    name: req.body.col,
+    owner: req.params.user,
+  });
+  if (!col) {
+    return res.status(400).json({ msg: "Collection doesn't exist" });
+  }
   if (note) {
     note.title = req.body.title;
     note.content = req.body.content;
