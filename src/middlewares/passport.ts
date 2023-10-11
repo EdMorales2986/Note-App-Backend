@@ -4,13 +4,13 @@ import users from "../models/users";
 // Passport Middleware
 const opts: StrategyOptions = {
   // jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  jwtFromRequest: ExtractJwt.fromUrlQueryParameter("JWT"),
+  jwtFromRequest: ExtractJwt.fromBodyField("token"),
   secretOrKey: process.env.JWTSECRET,
 };
 
 export default new Strategy(opts, async function (payload, done) {
   try {
-    const user = await users.findById(payload.id);
+    const user = await users.findOne({ alias: payload.alias });
     if (user) {
       return done(null, user);
     }

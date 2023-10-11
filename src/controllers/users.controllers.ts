@@ -42,15 +42,15 @@ export const signUp = async function (
   // .save() Saves this document 'newUser' by inserting a new document into the database
   await newUser.save();
 
-  return res.status(200).json(newUser);
+  return res.json(newUser);
   // return res.redirect(`/signin}`);
 };
 
 // Sign In functions
 export const signIn = async function (
   req: Request,
-  res: Response,
-  next: NextFunction
+  res: Response
+  // next: NextFunction
 ) {
   if (!req.body.alias || !req.body.password) {
     return res.status(400).json({ msg: "Please send your alias and password" });
@@ -63,8 +63,8 @@ export const signIn = async function (
 
   const isMatch = await user.comparePassword(req.body.password);
   if (isMatch) {
-    // const token = createToken(user);
-    return res.redirect(`/signin/${req.body.alias}`);
+    const token = createToken(user);
+    return res.json({ jwt: token, user: user });
   }
 
   return res
@@ -120,7 +120,7 @@ export const updateInfo = async function (req: Request, res: Response) {
     user.email = req.body.email;
     user.password = req.body.newPass;
     await user.save();
-    return res.redirect(`/signin/${req.params.user}`);
+    // return res.redirect(`/signin/${req.params.user}`);
   }
 
   // {

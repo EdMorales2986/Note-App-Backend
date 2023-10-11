@@ -42,13 +42,15 @@ const signUp = function (req, res) {
         const newUser = new users_1.default(req.body);
         // .save() Saves this document 'newUser' by inserting a new document into the database
         yield newUser.save();
-        return res.status(200).json(newUser);
+        return res.json(newUser);
         // return res.redirect(`/signin}`);
     });
 };
 exports.signUp = signUp;
 // Sign In functions
-const signIn = function (req, res, next) {
+const signIn = function (req, res
+// next: NextFunction
+) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!req.body.alias || !req.body.password) {
             return res.status(400).json({ msg: "Please send your alias and password" });
@@ -59,8 +61,8 @@ const signIn = function (req, res, next) {
         }
         const isMatch = yield user.comparePassword(req.body.password);
         if (isMatch) {
-            // const token = createToken(user);
-            return res.redirect(`/signin/${req.body.alias}`);
+            const token = createToken(user);
+            return res.json({ jwt: token, user: user });
         }
         return res
             .status(400)
@@ -111,7 +113,7 @@ const updateInfo = function (req, res) {
             user.email = req.body.email;
             user.password = req.body.newPass;
             yield user.save();
-            return res.redirect(`/signin/${req.params.user}`);
+            // return res.redirect(`/signin/${req.params.user}`);
         }
         // {
         //   "name": "Alonso",

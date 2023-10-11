@@ -9,36 +9,24 @@ import { displayNote } from "../controllers/notes.controllers";
 import passport from "passport";
 
 const router = Router();
+//Not Used, More Problems Than Solutions: passport.authenticate("jwt", { session: false }),
 
-// Routes for before you login in the app
-router.get("/signup", function (req: Request, res: Response) {
-  res.send("signup");
-});
+router.post(
+  "/jwt-verify",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    res.json({ state: true });
+  }
+);
+
 router.post("/signup", signUp);
-
-router.get("/signin", function (req: Request, res: Response) {
-  res.send("signin");
-});
-
 router.post("/signin", signIn);
 
 // Routes for after you login in the app
-router.get(
-  "/signin/:user",
-  // passport.authenticate("jwt", { session: false }),
-  displayNote
-);
+router.get("/signin/:user", displayNote);
 
-router.post(
-  "/signin/:user/delete",
-  // passport.authenticate("jwt", { session: false }),
-  deleteUser
-);
+router.post("/signin/:user/delete", deleteUser);
 
-router.post(
-  "/signin/:user/update",
-  // passport.authenticate("jwt", { session: false }),
-  updateInfo
-);
+router.post("/signin/:user/update", updateInfo);
 
 export default router;

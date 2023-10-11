@@ -17,13 +17,13 @@ const users_1 = __importDefault(require("../models/users"));
 // Passport Middleware
 const opts = {
     // jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    jwtFromRequest: passport_jwt_1.ExtractJwt.fromUrlQueryParameter("JWT"),
+    jwtFromRequest: passport_jwt_1.ExtractJwt.fromBodyField("token"),
     secretOrKey: process.env.JWTSECRET,
 };
 exports.default = new passport_jwt_1.Strategy(opts, function (payload, done) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const user = yield users_1.default.findById(payload.id);
+            const user = yield users_1.default.findOne({ alias: payload.alias });
             if (user) {
                 return done(null, user);
             }
