@@ -6,6 +6,7 @@ import {
   updateInfo,
 } from "../controllers/users.controllers";
 import { displayNote } from "../controllers/notes.controllers";
+import { displayCol } from "../controllers/col.controllers";
 import passport from "passport";
 
 const router = Router();
@@ -23,7 +24,8 @@ router.post("/signup", signUp);
 router.post("/signin", signIn);
 
 // Routes for after you login in the app
-router.get("/signin/:user", displayNote);
+router.get("/notes/:user", displayNote);
+router.get("/cols/:user", displayCol);
 
 router.post("/signin/:user/delete", deleteUser);
 
