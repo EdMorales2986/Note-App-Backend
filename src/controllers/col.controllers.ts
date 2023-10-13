@@ -4,7 +4,10 @@ import users, { IUser } from "../models/users";
 import cols, { ICol } from "../models/col";
 
 export const displayCol = async function (req: Request, res: Response) {
-  const colUser = await notes.aggregate([{ $sort: { createdAt: -1 } }]);
+  const colUser = await cols.aggregate([
+    { $sort: { createdAt: -1 } },
+    { $match: { owner: req.params.user } },
+  ]);
   res.json(colUser);
 };
 

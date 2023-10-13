@@ -17,7 +17,10 @@ const notes_1 = __importDefault(require("../models/notes"));
 const col_1 = __importDefault(require("../models/col"));
 const displayCol = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        const colUser = yield notes_1.default.aggregate([{ $sort: { createdAt: -1 } }]);
+        const colUser = yield col_1.default.aggregate([
+            { $sort: { createdAt: -1 } },
+            { $match: { owner: req.params.user } },
+        ]);
         res.json(colUser);
     });
 };
