@@ -8,7 +8,7 @@ function createToken(user: IUser) {
   return jwt.sign(
     { id: user.id, alias: user.alias },
     `${process.env.JWTSECRET}`,
-    { expiresIn: 600 }
+    { expiresIn: "12d" }
   );
 }
 
@@ -73,7 +73,7 @@ export const signIn = async function (
 };
 
 export const deleteUser = async function (req: Request, res: Response) {
-  if (!req.body.alias || !req.body.password) {
+  if (!req.body.password) {
     return res.status(400).json({ msg: "Please send valid data" });
   }
 
@@ -120,18 +120,8 @@ export const updateInfo = async function (req: Request, res: Response) {
     user.email = req.body.email;
     user.password = req.body.newPass;
     await user.save();
-    // return res.redirect(`/signin/${req.params.user}`);
+    return res.status(200).json({ msg: "user updated" });
   }
-
-  // {
-  //   "name": "Alonso",
-  //   "lname": "Rondon",
-  //   "email": "AlRo@gmail.com",
-  //   "oldAlias": "Ed_123",
-  //   "newAlias": "Al777",
-  //   "oldPass": "Wo_Xing_Shi",
-  //   "newPass": "bruh"
-  // }
 
   return res
     .status(400)

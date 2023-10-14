@@ -18,7 +18,7 @@ const users_1 = __importDefault(require("../models/users"));
 const col_1 = __importDefault(require("../models/col"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 function createToken(user) {
-    return jsonwebtoken_1.default.sign({ id: user.id, alias: user.alias }, `${process.env.JWTSECRET}`, { expiresIn: 600 });
+    return jsonwebtoken_1.default.sign({ id: user.id, alias: user.alias }, `${process.env.JWTSECRET}`, { expiresIn: "12d" });
 }
 // Auth Route Functionality
 // Sign Up functions
@@ -72,7 +72,7 @@ const signIn = function (req, res
 exports.signIn = signIn;
 const deleteUser = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!req.body.alias || !req.body.password) {
+        if (!req.body.password) {
             return res.status(400).json({ msg: "Please send valid data" });
         }
         const user = yield users_1.default.findOne({ alias: req.params.user });
@@ -113,17 +113,8 @@ const updateInfo = function (req, res) {
             user.email = req.body.email;
             user.password = req.body.newPass;
             yield user.save();
-            // return res.redirect(`/signin/${req.params.user}`);
+            return res.status(200).json({ msg: "user updated" });
         }
-        // {
-        //   "name": "Alonso",
-        //   "lname": "Rondon",
-        //   "email": "AlRo@gmail.com",
-        //   "oldAlias": "Ed_123",
-        //   "newAlias": "Al777",
-        //   "oldPass": "Wo_Xing_Shi",
-        //   "newPass": "bruh"
-        // }
         return res
             .status(400)
             .json({ msg: "Encountered and error during this process" });
