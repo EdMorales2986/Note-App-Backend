@@ -95,23 +95,25 @@ const deleteUser = function (req, res) {
 exports.deleteUser = deleteUser;
 const updateInfo = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!req.body.oldPass ||
-            !req.body.newPass ||
-            !req.body.email ||
-            !req.body.name ||
-            !req.body.lname) {
-            return res.status(400).json({ msg: "Please send valid data" });
-        }
+        // if (
+        //   !req.body.oldPass ||
+        //   !req.body.newPass ||
+        //   !req.body.email ||
+        //   !req.body.name ||
+        //   !req.body.lname
+        // ) {
+        //   return res.status(400).json({ msg: "Please send valid data" });
+        // }
         const user = yield users_1.default.findOne({ alias: req.params.user });
         if (!user) {
             return res.status(400).json({ msg: "User not found" });
         }
         const isMatch = yield user.comparePassword(req.body.oldPass);
         if (user && isMatch) {
-            user.name = req.body.name;
-            user.lname = req.body.lname;
-            user.email = req.body.email;
-            user.password = req.body.newPass;
+            user.name = req.body.name !== "" ? req.body.name : user.name;
+            user.lname = req.body.lname !== "" ? req.body.lname : user.lname;
+            user.email = req.body.email !== "" ? req.body.email : user.email;
+            user.password = req.body.newPass !== "" ? req.body.newPass : user.password;
             yield user.save();
             return res.status(200).json({ msg: "user updated" });
         }

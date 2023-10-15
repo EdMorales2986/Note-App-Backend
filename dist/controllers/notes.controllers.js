@@ -31,14 +31,28 @@ const createNote = function (req, res) {
         if (!req.body.title || !req.body.content) {
             return res.status(400).json({ msg: "Please send valid data" });
         }
-        const col = yield col_1.default.findOne({
-            name: req.body.col,
-            owner: req.params.user,
-        });
-        if (!col) {
-            return res.status(400).json({ msg: "Collection doesn't exist" });
-        }
         const user = yield users_1.default.findOne({ alias: req.params.user });
+        if (req.body.col !== "") {
+            const col = yield col_1.default.findOne({
+                name: req.body.col,
+                owner: req.params.user,
+            });
+            if (!col) {
+                return res.status(400).json({ msg: "Collection doesn't exist" });
+            }
+            if (user) {
+                const newNote = new notes_1.default({
+                    title: req.body.title,
+                    content: req.body.content,
+                    owner: req.params.user,
+                    col: req.body.col,
+                });
+                yield newNote.save();
+                user.notes.push(newNote._id);
+                yield user.save();
+                return res.status(200).json(newNote);
+            }
+        }
         if (user) {
             const newNote = new notes_1.default({
                 title: req.body.title,
@@ -58,24 +72,32 @@ const createNote = function (req, res) {
 exports.createNote = createNote;
 const updateNote = function (req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!req.body.title || !req.body.content || !req.body.content) {
-            return res.status(400).json({ msg: "Please send valid data" });
-        }
+        // if (!req.body.title || !req.body.content) {
+        //   return res.status(400).json({ msg: "Please send valid data" });
+        // }
         const note = yield notes_1.default.findById(req.params.id);
-        const col = yield col_1.default.findOne({
-            name: req.body.col,
-            owner: req.params.user,
-        });
-        if (!col) {
-            return res.status(400).json({ msg: "Collection doesn't exist" });
+        if (req.body.col !== "") {
+            const col = yield col_1.default.findOne({
+                name: req.body.col,
+                owner: req.params.user,
+            });
+            if (!col) {
+                return res.status(400).json({ msg: "Collection doesn't exist" });
+            }
+            if (note) {
+                note.title = req.body.title !== "" ? req.body.title : note.title;
+                note.content = req.body.content !== "" ? req.body.content : note.content;
+                note.col = req.body.col;
+                yield note.save();
+                return res.status(200).json({ msg: "note modified" });
+            }
         }
         if (note) {
-            note.title = req.body.title;
-            note.content = req.body.content;
+            note.title = req.body.title !== "" ? req.body.title : note.title;
+            note.content = req.body.content !== "" ? req.body.content : note.content;
             note.col = req.body.col;
             yield note.save();
             return res.status(200).json({ msg: "note modified" });
-            // return res.redirect(`/signin/${req.params.user}`);
         }
         return res.status(400).json({ msg: "Something went wrong" });
     });

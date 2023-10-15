@@ -98,15 +98,15 @@ export const deleteUser = async function (req: Request, res: Response) {
 };
 
 export const updateInfo = async function (req: Request, res: Response) {
-  if (
-    !req.body.oldPass ||
-    !req.body.newPass ||
-    !req.body.email ||
-    !req.body.name ||
-    !req.body.lname
-  ) {
-    return res.status(400).json({ msg: "Please send valid data" });
-  }
+  // if (
+  //   !req.body.oldPass ||
+  //   !req.body.newPass ||
+  //   !req.body.email ||
+  //   !req.body.name ||
+  //   !req.body.lname
+  // ) {
+  //   return res.status(400).json({ msg: "Please send valid data" });
+  // }
 
   const user = await users.findOne({ alias: req.params.user });
   if (!user) {
@@ -115,10 +115,10 @@ export const updateInfo = async function (req: Request, res: Response) {
 
   const isMatch = await user.comparePassword(req.body.oldPass);
   if (user && isMatch) {
-    user.name = req.body.name;
-    user.lname = req.body.lname;
-    user.email = req.body.email;
-    user.password = req.body.newPass;
+    user.name = req.body.name !== "" ? req.body.name : user.name;
+    user.lname = req.body.lname !== "" ? req.body.lname : user.lname;
+    user.email = req.body.email !== "" ? req.body.email : user.email;
+    user.password = req.body.newPass !== "" ? req.body.newPass : user.password;
     await user.save();
     return res.status(200).json({ msg: "user updated" });
   }
